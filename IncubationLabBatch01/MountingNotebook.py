@@ -1,7 +1,7 @@
 # Databricks notebook source
 # DBTITLE 1,Linking Bronze Container to Databricks
 storageAccountName = "adls001ilbatch01siva"
-sasToken = "sp=racwlme&st=2024-03-11T13:48:58Z&se=2024-04-30T21:48:58Z&spr=https&sv=2022-11-02&sr=c&sig=o%2FooKnI8FDrzSIXoplETMcnB%2BVj01LxoK0AJLR1tJiU%3D"
+sasToken = "sp=racwdlmeop&st=2024-03-13T12:24:24Z&se=2024-04-30T20:24:24Z&spr=https&sv=2022-11-02&sr=c&sig=WYAcxt2xZsh7sBlw4rr5mvB2S%2BZ2oh4hkX2dbEkLZjM%3D"
 blobContainerName = "bronze"
 mountPoint = "/mnt/AdventureworksLT/bronze"
 if not any(mount.mountPoint == mountPoint for mount in dbutils.fs.mounts()):
@@ -19,7 +19,7 @@ if not any(mount.mountPoint == mountPoint for mount in dbutils.fs.mounts()):
 
 # DBTITLE 1,Linking Silver Container to Databricks
 storageAccountName = "adls001ilbatch01siva"
-sasToken = "sp=racwlme&st=2024-03-11T13:51:45Z&se=2024-04-30T21:51:45Z&spr=https&sv=2022-11-02&sr=c&sig=PSUIov594%2FhHrHv%2BHsIDZ7a5EGJQvTC05fdgVoZh6AI%3D"
+sasToken = "sp=racwdlmeop&st=2024-03-13T12:27:14Z&se=2024-04-30T20:27:14Z&spr=https&sv=2022-11-02&sr=c&sig=98AN5A3rSHLdSh8bJ5HDWy1X7X5UiUq8ZeHUT%2F6cNaA%3D"
 blobContainerName = "silver"
 mountPoint = "/mnt/AdventureworksLT/silver"
 if not any(mount.mountPoint == mountPoint for mount in dbutils.fs.mounts()):
@@ -37,7 +37,7 @@ if not any(mount.mountPoint == mountPoint for mount in dbutils.fs.mounts()):
 
 # DBTITLE 1,Linking Gold Container to Databricks
 storageAccountName = "adls001ilbatch01siva"
-sasToken = "sp=racwlme&st=2024-03-11T13:55:21Z&se=2024-04-30T21:55:21Z&spr=https&sv=2022-11-02&sr=c&sig=thyRG3%2BRWYENB7yFlqBPzxjPclumSQXgNGtjBU4Z%2BrM%3D"
+sasToken = "sp=racwdlmeop&st=2024-03-13T12:28:36Z&se=2024-04-30T20:28:36Z&spr=https&sv=2022-11-02&sr=c&sig=nfD6SuoYh6uvLgqfLdZUhrrqHjsAIgJbrNFumvpu%2B10%3D"
 blobContainerName = "gold"
 mountPoint = "/mnt/AdventureworksLT/gold"
 if not any(mount.mountPoint == mountPoint for mount in dbutils.fs.mounts()):
@@ -53,9 +53,9 @@ if not any(mount.mountPoint == mountPoint for mount in dbutils.fs.mounts()):
 
 # COMMAND ----------
 
-display(dbutils.fs.ls("/mnt/AdventureworksLT/bronze"))
-display(dbutils.fs.ls("/mnt/AdventureworksLT/silver"))
-display(dbutils.fs.ls("/mnt/AdventureworksLT/gold"))
+dbutils.fs.ls("/mnt/AdventureworksLT/bronze")
+dbutils.fs.ls("/mnt/AdventureworksLT/silver")
+dbutils.fs.ls("/mnt/AdventureworksLT/gold")
 
 # COMMAND ----------
 
@@ -67,6 +67,7 @@ sdfgkl
 
 # COMMAND ----------
 
+# DBTITLE 1,Unmounting of bronze, silver, gold
 dbutils.fs.unmount('/mnt/AdventureworksLT/bronze')
 dbutils.fs.unmount('/mnt/AdventureworksLT/silver')
 dbutils.fs.unmount('/mnt/AdventureworksLT/gold')
