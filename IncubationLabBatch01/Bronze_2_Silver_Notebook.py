@@ -1,11 +1,14 @@
 # Databricks notebook source
 # DBTITLE 1,Creation of Widgets
 dbutils.widgets.text("LoadType", "Full")
-v_LoadType = dbutils.widgets.get("LoadType")
+v_loadType = dbutils.widgets.get("LoadType")
+dbutils.widgets.text("SchemaName", "SalesLT")
+v_schemaName = dbutils.widgets.get("SchemaName")
 
 # COMMAND ----------
 
-v_LoadType
+# DBTITLE 1,Validation of Widgets
+v_schemaName+' '+v_loadType
 
 # COMMAND ----------
 
@@ -21,61 +24,29 @@ from pyspark.sql.functions import col,lit,to_date
 # COMMAND ----------
 
 # DBTITLE 1,GetTable Name from the Bronze Container
-bronzePath= "/mnt/AdventureworksLT/bronze/SalesLT/"
-bronzeTables = getTables(bronzePath)
-print(bronzeTables)
+bronzeSchemaPath= bronzePath+v_schemaName+'/'
+silverSchemaPath= silverPath+v_schemaName+'/'
+bronzeTables = getTables(bronzeSchemaPath)
+#print(bronzeTables)
 
 # COMMAND ----------
 
 # DBTITLE 1,Performing Transformations and Writting into Silver in Delta format
 for i in bronzeTables:
-    bronzePath = "/mnt/AdventureworksLT/bronze/SalesLT/"+i+"/"+i+".parquet"
-    print(bronzePath)
-    silverPath = "/mnt/AdventureworksLT/silver/SalesLT/"+i+"/"
-    df = spark.read.format("parquet").option("mode","PERMISSIVE").load(bronzePath)
+    bronzeTablePath = bronzeSchemaPath+i+"/"+i+".parquet"
+    print(bronzeTablePath)
+    silverPath = silverSchemaPath+i+"/"
+    df = spark.read.format("parquet").option("mode","PERMISSIVE").load(bronzeTablePath)
     df_removedRowGUIDModifiedDate = removingRowGUIDModifiedDate(df)
     df_withOutNulls =nullHandling(df_removedRowGUIDModifiedDate)
     df_addedAuditColumns=addAuditColumns(df_withOutNulls)
-    df_Final= ModifiyingTimestamp2Date(df_addedAuditColumns)
-    if v_LoadType.upper() == 'FULL':
+    df_Final= modifiyingTimestamp2Date(df_addedAuditColumns)
+    if v_loadType.upper() == 'FULL':
         df_Final.write.format("delta").mode("OVERWRITE").option("mergeSchema", "true").save(silverPath)
     else:
-        df_Final.write.format("delta").mode("append").option("mergeSchema", "true").save(silverPath)
+        for tableName,primaryKeys in primary_keys_dict.items() :
+            if tableName == i:
+                mergeDeltaData(df_Final, "silver_saleslt", tableName, primaryKeys)
+                print(tableName+ " is merged")
+    profileStats(df_Final,i,"silver_saleslt")
     print(i+ " table is load") 
-
-# COMMAND ----------
-
-silverAddressDF = spark.read.format("delta").load(silverPath)
-display(silverAddressDF)
-
-# COMMAND ----------
-
-silverPath="/mnt/AdventureworksLT/silver/SalesLT/"
-silverTables = getTables(silverPath)
-print(silverTables)
-
-# COMMAND ----------
-
-
-
-# COMMAND ----------
-
-
-
-
-
-# COMMAND ----------
-
-productlist = [i for i in bronzeTables if 'PRODUCT' in i.upper()]
-print(productlist)
-for i  in productlist:
-    bronzePath = "/mnt/AdventureworksLT/bronze/SalesLT/"+i+"/"+i+".parquet"
-    print(bronzePath)
-    df = spark.read.format("parquet").option("mode","PERMISSIVE").load(bronzePath)
-    columnslist = [i for i in df.columns if "NAME" in i.upper()]
-    print(columnslist)
-    print(i)
-    for j in columnslist:
-        df=df.withColumnRenamed(j,i+j)
-        df.show()
-
