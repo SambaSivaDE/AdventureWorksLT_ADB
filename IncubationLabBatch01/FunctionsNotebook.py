@@ -113,7 +113,7 @@ def profileStats(df,table,dbname):
     id_value = [i for i in columnsList if 'ID' in i or table in i]
     aggregate_list = []
     for i in id_value:
-        aggregate_list.append(f"max({i}) as max_{i}, min({i}) as min_{i}, count(distinct {i}) as distinct_count_{i}")
+        aggregate_list.append(f"max({i}) as max_{i}, min({i}) as min_{i}, count(distinct {i}) as distinct_count_{i},avg({i}) as mean_{i}, var({i}) as variance_{i}, stdev({i}) as StandardDeviation_{i}")
     nullcount=[]
     for i in columnsList:
         nullcount.append(f"sum(case when {i} is Null then 1 else 0 end) as NullCount_{i}")
@@ -123,14 +123,6 @@ def profileStats(df,table,dbname):
     print(profileStatsPath)
     df_profileStats.coalesce(1).write.format("parquet").mode("overwrite").save(profileStatsPath)
     
-
-# COMMAND ----------
-
-from datetime import date
-
-value = str(date.today())
-
-print(value)
 
 # COMMAND ----------
 

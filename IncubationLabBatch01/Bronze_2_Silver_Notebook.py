@@ -4,6 +4,8 @@ dbutils.widgets.text("LoadType", "Full")
 v_loadType = dbutils.widgets.get("LoadType")
 dbutils.widgets.text("SchemaName", "SalesLT")
 v_schemaName = dbutils.widgets.get("SchemaName")
+dbutils.widgets.text("Tables", "ALL")
+v_tablesList = dbutils.widgets.get("Tables")
 
 # COMMAND ----------
 
@@ -12,7 +14,7 @@ v_schemaName+' '+v_loadType
 
 # COMMAND ----------
 
-# DBTITLE 1,Run the Functions Notebook to get needed functions
+# DBTITLE 1,Execute necessary functions
 # MAGIC %run 
 # MAGIC "./FunctionsNotebook"
 
