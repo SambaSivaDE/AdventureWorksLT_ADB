@@ -4,8 +4,6 @@ dbutils.widgets.text("LoadType", "Full")
 v_loadType = dbutils.widgets.get("LoadType")
 dbutils.widgets.text("SchemaName", "SalesLT")
 v_schemaName = dbutils.widgets.get("SchemaName")
-dbutils.widgets.text("Tables", "ALL")
-v_tablesList = dbutils.widgets.get("Tables")
 
 # COMMAND ----------
 
@@ -29,17 +27,21 @@ from pyspark.sql.functions import col,lit,to_date
 bronzeSchemaPath= bronzePath+v_schemaName+'/'
 silverSchemaPath= silverPath+v_schemaName+'/'
 bronzeTables = getTables(bronzeSchemaPath)
-#print(bronzeTables)
+print(bronzeTables)
+#print(silverPath)
 
 # COMMAND ----------
 
 # DBTITLE 1,Performing Transformations and Writting into Silver in Delta format
+watermarkdf = spark.read.jdbc(Connection_String, "audit.WaterMark").cache()
 for i in bronzeTables:
     bronzeTablePath = bronzeSchemaPath+i+"/"+i+".parquet"
-    print(bronzeTablePath)
+    print(i)
     silverPath = silverSchemaPath+i+"/"
     df = spark.read.format("parquet").option("mode","PERMISSIVE").load(bronzeTablePath)
-    df_removedRowGUIDModifiedDate = removingRowGUIDModifiedDate(df)
+    maxModifiedDate= findingWaterMark(watermarkdf,i)
+    df_filtered =df.filter(col("ModifiedDate")>=maxModifiedDate)
+    df_removedRowGUIDModifiedDate = removingRowGUIDModifiedDate(df_filtered)
     df_withOutNulls =nullHandling(df_removedRowGUIDModifiedDate)
     df_addedAuditColumns=addAuditColumns(df_withOutNulls)
     df_Final= modifiyingTimestamp2Date(df_addedAuditColumns)
@@ -51,4 +53,5 @@ for i in bronzeTables:
                 mergeDeltaData(df_Final, "silver_saleslt", tableName, primaryKeys)
                 print(tableName+ " is merged")
     profileStats(df_Final,i,"silver_saleslt")
-    print(i+ " table is load") 
+    print(i+ " table is load")
+updationOfWaterMark(bronzeTables)

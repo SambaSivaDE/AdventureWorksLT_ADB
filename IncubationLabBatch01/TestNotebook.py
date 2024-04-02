@@ -1,4 +1,9 @@
 # Databricks notebook source
+# MAGIC %run 
+# MAGIC "./FunctionsNotebook"
+
+# COMMAND ----------
+
 display(dbutils.fs.ls("/mnt/AdventureworksLT/bronze"))
 display(dbutils.fs.ls("/mnt/AdventureworksLT/silver"))
 display(dbutils.fs.ls("/mnt/AdventureworksLT/gold"))
@@ -33,11 +38,25 @@ dbutils.fs.put('/adbIncubationLab1/IncubationLabBatch01/Config/Databricks.json',
         "silverPath": "/mnt/AdventureworksLT/silver/",
         "goldPath": "/mnt/AdventureworksLT/gold/",
         "archivePath": "/mnt/AdventureworksLT/archive/"
-    }
+    },
+    "Connection_String":"jdbc:sqlserver://sql001ilbatch01siva.database.windows.net:1433;database=AdventureWorksLT;user=SQLAdmin;password=sivadb@123;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;"
 }
 """, True)
 
 
 # COMMAND ----------
 
-dbutils.fs.rm("/Workspace",True)
+#dbutils.fs.rm("/Workspace",True)
+
+# COMMAND ----------
+
+from delta.tables import *
+
+bronzeSchemaPath= bronzePath+'SalesLT/'
+bronzeTables = getTables(bronzeSchemaPath)
+print(bronzeTables)
+for table_name in bronzeTables:
+    delta_table = DeltaTable.forPath(spark, f"/mnt/AdventureworksLT/silver/SalesLT/{table_name}")
+    #delta_table.optimize()
+    print(table_name+'is optimized')
+

@@ -28,6 +28,8 @@ Silver_Token = SAS_Tokens.get("Silver_Token")
 Gold_Token = SAS_Tokens.get("Gold_Token")
 Archive_Token = SAS_Tokens.get("Archive_Token")
 
+Connection_String= configData.get("Connection_String")
+#print(Connection_String)
 
 
 # COMMAND ----------
@@ -113,16 +115,38 @@ def profileStats(df,table,dbname):
     id_value = [i for i in columnsList if 'ID' in i or table in i]
     aggregate_list = []
     for i in id_value:
-        aggregate_list.append(f"max({i}) as max_{i}, min({i}) as min_{i}, count(distinct {i}) as distinct_count_{i},avg({i}) as mean_{i}, var({i}) as variance_{i}, stdev({i}) as StandardDeviation_{i}")
+        aggregate_list.append(f"max({i}) as max_{i}, min({i}) as min_{i}, count(distinct {i}) as distinct_count_{i},avg({i}) as mean_{i}, variance({i}) as variance_{i}, stddev({i}) as StandardDeviation_{i}")
     nullcount=[]
     for i in columnsList:
         nullcount.append(f"sum(case when {i} is Null then 1 else 0 end) as NullCount_{i}")
     select_statement = "select " + ", ".join(aggregate_list) +" , "+", ".join(nullcount)+ " from " + dbname+'.'+table
     df_profileStats=spark.sql(select_statement)
-    profileStatsPath = archivePath+'profileStats/'+table+'/'+str(date.today())
-    print(profileStatsPath)
+    profileStatsPath = '/mnt/AdventureworksLT/silver/profileStats/'+table+'/'+str(date.today())
+    #print(profileStatsPath)
     df_profileStats.coalesce(1).write.format("parquet").mode("overwrite").save(profileStatsPath)
     
+
+# COMMAND ----------
+
+# DBTITLE 1,findingWaterMark
+def findingWaterMark(df,table):
+    filters= df.filter(col('TableName')==table)
+    max_value = filters.select(date_format("LastUsedDate", "yyyy-MM-dd")).collect()[0][0]
+    #print(max_value)
+    return max_value
+
+# COMMAND ----------
+
+# DBTITLE 1,updationOfWaterMark
+def updationOfWaterMark(tablelist):
+    tableDatelist=[]
+    for i in tablelist:
+        df = spark.read.jdbc(Connection_String, f"SalesLT.{i}")
+        maxModifiedDate = df.select(date_format("ModifiedDate","yyyy-MM-dd")).collect()[0][0]
+        tableDatelist.append((i,maxModifiedDate))
+    waterMarkDf = spark.createDataFrame(tableDatelist,["TableName", "LastUsedDate"])
+    waterMarkDf.write.jdbc(Connection_String, "audit.WaterMark", mode="overwrite")
+    print("WaterMark Table Updated...!")
 
 # COMMAND ----------
 
