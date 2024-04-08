@@ -5,10 +5,16 @@ v_loadType = dbutils.widgets.get("LoadType")
 dbutils.widgets.text("SchemaName", "SalesLT")
 v_schemaName = dbutils.widgets.get("SchemaName")
 
+
 # COMMAND ----------
 
 # DBTITLE 1,Validation of Widgets
 v_schemaName+' '+v_loadType
+
+from datetime import date
+today = date.today()
+print(date.today().strftime("%Y")+"/"+date.today().strftime("%m")+"/"+date.today().strftime("%d")+"/")
+
 
 # COMMAND ----------
 
@@ -35,23 +41,29 @@ print(bronzeTables)
 # DBTITLE 1,Performing Transformations and Writting into Silver in Delta format
 watermarkdf = spark.read.jdbc(Connection_String, "audit.WaterMark").cache()
 for i in bronzeTables:
-    bronzeTablePath = bronzeSchemaPath+i+"/"+i+".parquet"
+    bronzeTablePath = bronzeSchemaPath+i+"/"+date.today().strftime("%Y")+"/"+date.today().strftime("%m")+"/"+date.today().strftime("%d")+"/"+i+".parquet"
     print(i)
     silverPath = silverSchemaPath+i+"/"
     df = spark.read.format("parquet").option("mode","PERMISSIVE").load(bronzeTablePath)
-    maxModifiedDate= findingWaterMark(watermarkdf,i)
-    df_filtered =df.filter(col("ModifiedDate")>=maxModifiedDate)
+    if v_schemaName=='SalesLT' and v_loadType.upper() != 'FULL':
+        maxModifiedDate= findingWaterMark(watermarkdf,i)
+        df_filtered =df.filter(col("ModifiedDate")>=maxModifiedDate)
+    else:
+        df_filtered=df
     df_removedRowGUIDModifiedDate = removingRowGUIDModifiedDate(df_filtered)
     df_withOutNulls =nullHandling(df_removedRowGUIDModifiedDate)
     df_addedAuditColumns=addAuditColumns(df_withOutNulls)
     df_Final= modifiyingTimestamp2Date(df_addedAuditColumns)
-    if v_loadType.upper() == 'FULL':
+    #df_Final.display()
+    if v_loadType.upper() == 'FULL' :
         df_Final.write.format("delta").mode("OVERWRITE").option("mergeSchema", "true").save(silverPath)
     else:
         for tableName,primaryKeys in primary_keys_dict.items() :
             if tableName == i:
                 mergeDeltaData(df_Final, "silver_saleslt", tableName, primaryKeys)
                 print(tableName+ " is merged")
-    profileStats(df_Final,i,"silver_saleslt")
+    if v_schemaName=='SalesLT':
+        profileStats(df_Final,i,"silver_saleslt")
     print(i+ " table is load")
-updationOfWaterMark(bronzeTables)
+if v_schemaName=='SalesLT':
+    updationOfWaterMark(bronzeTables)

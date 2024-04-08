@@ -57,7 +57,7 @@ def addAuditColumns(df):
 def modifiyingTimestamp2Date(df):
     columnList = df.columns
     for col in columnList:
-        if "Date" in col or "date" in col:
+        if "Date" in col or "date" in col or "_DTM" in col or "_DT" in col:
             df =df.withColumn(col,date_format(from_utc_timestamp(df[col].cast(TimestampType()),"UTC"),"yyyy-MM-dd").cast(DateType()))
     return df
 
