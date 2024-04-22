@@ -46,7 +46,7 @@ def getTables(path):
 # DBTITLE 1,addAuditColumns
 def addAuditColumns(df):
   createdDateDf = df.withColumn("CreatedDate", to_date(current_date(), format="yyyy-MM-dd"))
-  CreatedByDf = createdDateDf.withColumn("CreatedBy", lit("Hari"))
+  CreatedByDf = createdDateDf.withColumn("CreatedBy", lit("createdby"))
   ModifiedDateDf = CreatedByDf.withColumn("ModifiedDate", lit("1990-01-01").cast(DateType()))
   ModifiedByDf = ModifiedDateDf.withColumn("ModifiedBy", lit("NA"))
   return ModifiedByDf
@@ -100,7 +100,7 @@ def mergeDeltaData(inputDf, dbName, tableName, primaryKeys):
         USING input_table AS src
         ON {merge_condition}
         WHEN MATCHED THEN
-            UPDATE SET {', '.join([f'tgt.{col} = src.{col}' for col in inputDf.columns if col not in ["CreatedDate","CreatedBy","ModifiedDate","ModifiedBy"]] + ['ModifiedDate=current_date()', "ModifiedBy='HariIncrement'"])}
+            UPDATE SET {', '.join([f'tgt.{col} = src.{col}' for col in inputDf.columns if col not in ["CreatedDate","CreatedBy","ModifiedDate","ModifiedBy"]] + ['ModifiedDate=current_date()', "ModifiedBy='modifiedbyIncrement'"])}
         WHEN NOT MATCHED THEN
             INSERT *
     """
