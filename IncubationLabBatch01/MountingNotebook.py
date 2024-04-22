@@ -6,7 +6,7 @@
 # COMMAND ----------
 
 # DBTITLE 1,Linking Bronze Container to Databricks
-storageAccountName = "adls001ilbatch01siva"
+storageAccountName = "<storageaccountname>"
 sasToken = Bronze_Token
 blobContainerName = "bronze"
 mountPoint = "/mnt/AdventureworksLT/bronze"
@@ -24,7 +24,7 @@ if not any(mount.mountPoint == mountPoint for mount in dbutils.fs.mounts()):
 # COMMAND ----------
 
 # DBTITLE 1,Linking Silver Container to Databricks
-storageAccountName = "adls001ilbatch01siva"
+storageAccountName = "<storageaccountname>"
 sasToken = Silver_Token
 blobContainerName = "silver"
 mountPoint = "/mnt/AdventureworksLT/silver"
@@ -42,7 +42,7 @@ if not any(mount.mountPoint == mountPoint for mount in dbutils.fs.mounts()):
 # COMMAND ----------
 
 # DBTITLE 1,Linking Gold Container to Databricks
-storageAccountName = "adls001ilbatch01siva"
+storageAccountName = "<storageaccountname>"
 sasToken = Gold_Token
 blobContainerName = "gold"
 mountPoint = "/mnt/AdventureworksLT/gold"
@@ -59,7 +59,7 @@ if not any(mount.mountPoint == mountPoint for mount in dbutils.fs.mounts()):
 
 # COMMAND ----------
 
-storageAccountName = "adls001ilbatch01siva"
+storageAccountName = "<storageaccountname>"
 sasToken = Archive_Token
 blobContainerName = "archive"
 mountPoint = "/mnt/AdventureworksLT/archive"
