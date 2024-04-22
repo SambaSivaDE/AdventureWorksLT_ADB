@@ -12,14 +12,14 @@ display(dbutils.fs.ls("/mnt/AdventureworksLT/gold"))
 
 dbutils.fs.put('/adbIncubationLab1/IncubationLabBatch01/Config/Databricks.json', """
 {
-    "workspace_url": "https://adb-4867293382117366.6.azuredatabricks.net/",
-    "databricks_access_token": "dapi009b244c3681f0b86a61da22f2af8acd-3",
-    "ADLS_Container_Name": "adls001ilbatch01siva",  
+    "workspace_url": "https://adb-<########>.6.azuredatabricks.net/",
+    "databricks_access_token": "<Databricks PA token>",
+    "ADLS_Container_Name": "Constianer Name",  
     "SAS_Tokens": {
-        "Bronze_Token": "sp=racwdlmeop&st=2024-03-13T12:24:24Z&se=2024-04-30T20:24:24Z&spr=https&sv=2022-11-02&sr=c&sig=WYAcxt2xZsh7sBlw4rr5mvB2S%2BZ2oh4hkX2dbEkLZjM%3D",
-        "Silver_Token": "sp=racwdlmeop&st=2024-03-13T12:27:14Z&se=2024-04-30T20:27:14Z&spr=https&sv=2022-11-02&sr=c&sig=98AN5A3rSHLdSh8bJ5HDWy1X7X5UiUq8ZeHUT%2F6cNaA%3D",
-        "Gold_Token": "sp=racwdlmeop&st=2024-03-13T12:28:36Z&se=2024-04-30T20:28:36Z&spr=https&sv=2022-11-02&sr=c&sig=nfD6SuoYh6uvLgqfLdZUhrrqHjsAIgJbrNFumvpu%2B10%3D",
-        "Archive_Token": "sp=racwdlmeop&st=2024-03-20T06:02:25Z&se=2024-05-01T14:02:25Z&spr=https&sv=2022-11-02&sr=c&sig=vh18yrNaoRiFNEGJKAgQdgUk4DmG28prJIIFjLqFNmk%3D"
+        "Bronze_Token": "sp=<bronze layer container token>",
+        "Silver_Token": "sp=<silver layer container token>",
+        "Gold_Token": "sp=<gold layer container token>",
+        "Archive_Token": "sp=<archvie layer container token>",
         },
     "primary_keys_dict": {
         "Address": ["AddressID"],
@@ -39,7 +39,7 @@ dbutils.fs.put('/adbIncubationLab1/IncubationLabBatch01/Config/Databricks.json',
         "goldPath": "/mnt/AdventureworksLT/gold/",
         "archivePath": "/mnt/AdventureworksLT/archive/"
     },
-    "Connection_String":"jdbc:sqlserver://sql001ilbatch01siva.database.windows.net:1433;database=AdventureWorksLT;user=SQLAdmin;password=sivadb@123;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;"
+    "Connection_String":"jdbc:sqlserver://<sql server name>.database.windows.net:1433;database=AdventureWorksLT;user=<username>;password=<user password>;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;"
 }
 """, True)
 
