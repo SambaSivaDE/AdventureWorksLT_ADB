@@ -1,0 +1,24 @@
+import pyspark.sql.functions as F
+def flatten_df_full(nested_df,recordId_cols):
+    
+    flat_cols = [c[0] for c in nested_df.dtypes if c[1][:6] != 'struct' and c[1][:5] !="array"]
+    #print("flat_cols : ",flat_cols )
+    nested_cols = [c[0] for c in nested_df.dtypes if c[1][:6] == 'struct']
+    array_cols_needed=[c[0] for c in nested_df.dtypes if c[1][:5] == 'array' and c[0] in recordId_cols]
+    array_cols=[c[0] for c in nested_df.dtypes if c[1][:5] == 'array' and c[0] not in recordId_cols]
+    #print("array_cols",array_cols)
+    #print("nested_cols :",nested_cols)
+    for ac in array_cols_needed:
+        nested_df=nested_df.select(flat_cols+nested_cols+[x for x in array_cols_needed if x != ac ]+[F.explode_outer(ac).alias(ac)]+array_cols)
+        #print(nested_df.columns)
+    nested_df = nested_df.select(flat_cols +array_cols+array_cols_needed+
+                               [F.col(nc+'.'+c).alias(nc+'_'+c)
+                                for nc in nested_cols
+                                for c in nested_df.select(nc+'.*').columns])
+    new_nested=[c[0] for c in nested_df.dtypes if c[1][:6] == 'struct']
+    new_array=[c[0] for c in nested_df.dtypes if c[1][:5] == 'array' and c[0]  in recordId_cols]
+    if new_nested or new_array :
+        print("entering",new_nested,new_array)
+        return flatten_df_full(nested_df,recordId_cols)
+    else:
+      return nested_df
